@@ -1,0 +1,20 @@
+# this specifies which docker compose version to be used
+version: "3"
+# services declare which processes docker should look out for. In this project its just one which is the Django Project. You can have multiple here
+services:
+    # This is a service
+    app:
+        # This is to declare which files are to be used in the docker-compose
+        build:
+            # context tells docker which files to use. using . means root
+            context: .
+        # ports tell docker which ports to open
+        ports:
+            # this maps docker's port 8000 with our local port 8000. When we access port 800 we are also accessing dockers port 8000
+            - "8000:8000"
+        volumes:
+            # this tells docker that our local app folder is connected to dockers /app folder. If we update from out local machine, so does dockers /app folder.
+            - ./app:/app
+        # command is the command to be run. the > symbol allows us to use the next line for readability purposes.
+        command: >
+            sh -c "python manage.py runserver 0.0.0.0:8000"
