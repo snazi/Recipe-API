@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
 PermissionsMixin
+from django.conf import settings
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -36,3 +37,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+class Tag(models.Model):
+    """
+    Tag to be used in a Recipe, "A recipe has tags that the user can add"
+    """
+    # We state that a Tag name can be around 255 chars in length
+    name = models.CharField(max_length=255)
+    # In db talk, We're assigning a foreign key which can be used to link this Tag table to another table.
+    user = models.ForeignKey(
+        # We want to tie this tag to the user. This is just a best practice that we grab the settings from the helper Django provides. Rather than call user above.
+        settings.AUTH_USER_MODEL,
+        # This setting makes sure thatwhen the user is deleted. The tag related to the user is also deleted.
+        on_delete=models.CASCADE,
+    )
+    # This function is overriding the string representation of the tag. Instead of converting to string, we just want it to send the name.
+    def __str__(self):
+        return self.name
