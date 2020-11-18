@@ -6,6 +6,7 @@ from recipe import views
 # DefaultRouter is from DjangoRest that generates the urls for our view
 router = DefaultRouter()
 router.register('tags', views.TagViewSet)
+router.register('ingredients', views.IngredientViewSet)
 
 app_name = 'recipe'
 
