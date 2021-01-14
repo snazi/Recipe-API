@@ -1,4 +1,6 @@
-from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -67,6 +69,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         if self.action == 'retrieve':
             return serializers.RecipeDetailSerializer
+        elif self.action == 'upload_image':
+            return serializers.RecipeImageSerializer
+        elif self.action == 'retrieve-image':
+            return serializers.RecipeImageDetailSerializer
 
         return self.serializer_class
 
@@ -76,3 +82,41 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """
         
         serializer.save(user=self.request.user)
+    
+    # @action method allows us to make custom functions aside from the premade functions that Django Provides.
+    @action(methods=['POST'], detail=True, url_path='upload-image')
+    def upload_image(self, request, pk=None):
+        """
+        Upload an image to a recipe
+        """
+        # This will always be the way you call to grab the object
+        recipe = self.get_object()
+        # we grab the recipe and pass in whatever data we got from the request
+        serializer = self.get_serializer(
+            recipe,
+            data=request.data
+        )
+        # is_valid checks if the image is the same asthe imagefield value we assigned
+        if serializer.is_valid():
+            # Save the valid serializer
+            serializer.save()
+            # return what we got. Since our serializers return the object. And we also return that since its valid then its an OK
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+        # Else, theres an error.
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(methods=['GET'], detail=True, url_path='retrieve-image')
+    def get_images(self, request, pk=None):
+        recipe = self.get_object()
+        serializer = serializers.RecipeImageDetailSerializer(recipe)
+        return Response(
+            serializer.data
+        )
+
+
